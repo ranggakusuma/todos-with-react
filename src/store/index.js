@@ -1,14 +1,19 @@
 import { createStore } from 'redux'
 
 const initialState = {
-  isLogin: ''
+  isLogin: '',
+  todos: []
 }
 
 const reducer = (state = initialState, action) => {
   switch(action.type) {
-    case 'LoginSuccess': 
-      console.log('masuk sini sih')
+    case 'LogInCheck':
+      // console.log('checking login', action.data)
       return {...state, isLogin: action.data}
+    case 'Logout':
+      return {...state, isLogin: ''}
+    case 'ReadTodos': 
+      return {...state, todos: action.data}
     default:
       return state
   }

@@ -1,5 +1,5 @@
-import React, { Component } from 'react'
-import { Redirect } from 'react-router-dom'
+import React, { Component, Fragment } from 'react'
+import { Redirect, Link } from 'react-router-dom'
 import api from '../../api/api'
 import { connect } from "react-redux";
 
@@ -12,13 +12,24 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    onLoginSuccess: () => {
-      const action = {
-        type: 'LoginSuccess',
-        data: 'test'
-      }
+    onLoginSuccess: async (token) => {
+      if (token) {
+        const {data: {email}} = await api({
+          method: 'POST',
+          url: '/users',
+          headers: {
+            Auth: token
+          }
+        })
 
-      dispatch(action)
+        const action = {
+          type: 'LogInCheck',
+          data: email
+        }
+
+        dispatch(action)
+      }
+      
     }
   }
 }
@@ -26,7 +37,8 @@ const mapDispatchToProps = (dispatch) => {
 class Login extends Component {
   state = {
     email: '',
-    password: ''
+    password: '',
+    errMsg: ''
   }
 
   loginSend = (e) => {
@@ -42,48 +54,63 @@ class Login extends Component {
       },
     })
       .then(({data}) => {
-        console.log(data)
+        // console.log(data)
         localStorage.token = data.token
-        onLoginSuccess()
+        onLoginSuccess(data.token)
         history.push('/')
       }).catch((err) => {
+        this.setState({errMsg: err.response.data.message})
         console.log(err.response.data.message)
       });
-    
-    
   }
 
   render() {
     const { isLogin } = this.props
-    const { email, password } = this.state
-
+    const { email, password, errMsg } = this.state
+    const styleLink = {
+      marginTop: '2vh',
+      float: 'right', 
+      cursor: 'pointer', 
+      color: 'blue', 
+      textDecoration: 'underline'
+    }
+    let error = ''
+    if (errMsg) {
+      error = <div className="alert">
+        <span className="closebtn" onClick={() => this.setState({errMsg: ''})}>&times;</span>
+        {errMsg}
+      </div>
+    }
     return (isLogin) ? <Redirect to="/"/> :
-    <div className="flexbox-container">
-      <div className="flexbox-item fixed">
-        <div className="demo">
-          <form onSubmit={this.loginSend}>
-            <h2 style={{marginBottom: 20}}>Login Form</h2>
-            
-            <label htmlFor="email" >Email:</label>
-            <input id="email" type="text" 
-            className="form-control"
-            placeholder="Email address" 
-            autoComplete="off"
-            onChange={(e) => this.setState({email: e.target.value})}
-            value={email}/>
-            
-            <label htmlFor="password">Password:</label>
-            <input id="password" type="password"
-            className="form-control"
-            placeholder="Password"
-            onChange={(e) => this.setState({password: e.target.value})}
-            value={password}/>
+    <Fragment>
+      <div className="flexbox-container">
+        <div className="flexbox-item fixed">
+          <div className="demo">
+            <form onSubmit={this.loginSend}>
+              {error}
+              <h2 style={{marginBottom: 20}}>Login Form</h2>
+              <label htmlFor="email" >Email:</label>
+              <input id="email" type="text" 
+              className="form-control"
+              placeholder="Email address" 
+              autoComplete="off"
+              onChange={(e) => this.setState({email: e.target.value})}
+              value={email}/>
+              
+              <label htmlFor="password">Password:</label>
+              <input id="password" type="password"
+              className="form-control"
+              placeholder="Password"
+              onChange={(e) => this.setState({password: e.target.value})}
+              value={password}/>
 
-            <button className="btn green my-2" >Submit</button>
-          </form>
+              <button className="btn green my-2" >Submit</button>
+              <Link to="/register"><div style={styleLink}>Register new account</div></Link>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
+    </Fragment>
   }
 }
 
