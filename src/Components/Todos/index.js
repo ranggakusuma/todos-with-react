@@ -1,43 +1,23 @@
 import React from 'react'
-import {connect} from 'react-redux'
-
-const mapStateToProps = (state) => {
-  return {
-    todos: state.todos
-  }
-}
-
-const mapDispatchToProps = (dispatch) => {
-  return {
-    onDelete: () => {
-      console.log('delete here')
-    }
-  }
-}
+import Todo from './Todo'
 
 const Todos = (props) => {
   const { todos } = props 
   return (
-    // <div>
-    //   ini todos
-
-    //   <table className="table">
-    //     <thead>
-    //       <tr>
-    //         <th>test</th>
-    //         <th>test</th>
-    //       </tr>
-    //     </thead>
-    //     <tbody>
-    //       <tr>
-    //         <td>123</td>
-    //         <td>123</td>
-    //       </tr>
-    //     </tbody>
-    //   </table>
-    // </div>
-    todos.map(todo => <h1>{todo.name}</h1>)
+  <table className="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Due Date</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+    {todos.map(todo => <Todo todo={todo} key={todo._id}/>)}
+    </tbody>
+  </table>
   )
 } 
 
-export default connect(mapStateToProps, mapDispatchToProps)(Todos)
+export default Todos

@@ -23,6 +23,11 @@ code {
   margin-top: .5rem!important;
 }
 
+.mx-2 {
+  margin-right: .5rem!important;
+  margin-left: .5rem!important;
+}
+
 .px-2 {
   padding-right: .5em!important;
   padding-left: .5em!important;
@@ -102,6 +107,18 @@ label {
 
 .green {
   background-color: green;
+  color: white;
+  font-weight: bold;
+}
+
+.red {
+  background-color: #c80505;
+  color: white;
+  font-weight: bold;
+}
+
+.yellow {
+  background-color: rgb(33, 33, 170);
   color: white;
   font-weight: bold;
 }

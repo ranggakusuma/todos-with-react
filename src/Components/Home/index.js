@@ -1,69 +1,92 @@
 import React, { Component, Fragment } from 'react'
 import { connect } from 'react-redux'
-import { Redirect } from 'react-router-dom'
 import Navbar from '../Navbar'
 import Container from '../Container'
+import login from '../../store/action/login'
+import readTodos from '../../store/action/readTodos'
 import Todos from '../Todos'
-import api from '../../api/api'
+import Modal from 'react-responsive-modal';
+import AddTodo from '../form/addTodo'
+import Sidebar from '../Sidebar/index'
 
 const mapStateToProps = (state) => {
-  // console.log(state.isLogin, 'sasas')
   return {
-    isLogin: state.isLogin
+    login: state.login,
+    todos: state.todos
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    readTodos: (data) => {
-      const action = {
-        type: 'ReadTodos',
-        data: data
-      }
-      dispatch(action)
-      // console.log(data)
-    }
+    readTodos: (token) => {
+      dispatch(readTodos(token))
+    },
+    checkLogin: (token, push) => {
+      dispatch(login(token, push))
+    },
   }
 }
 
 class Home extends Component {
-  
-  componentDidMount =() => {
-    const { isLogin, readTodos } = this.props
-    if (isLogin) {
-      api({
-        url: '/todos',
-        method: 'GET',
-        headers: {
-          Auth: localStorage.token
-        }
-      })
-        .then(({ data: { todos } }) => {
-          // console.log(todos, 'data todos')
-          readTodos(todos)
-        }).catch((err) => {
-          
-        });
-    }
+
+  state = {
+    openModal: false,
+    show: 'all'
   }
 
+  componentDidMount =() => {
+    this.props.checkLogin(localStorage.token, this.props.history)
+
+    if (localStorage.token) {
+      this.props.readTodos(localStorage.token)
+    }
+  }
+  
   render () {
-    const { isLogin } = this.props
+    const { openModal, show } = this.state
+
+    let todosShow = [...this.props.todos.todos]
+    if (show === 'unfinish') {
+      todosShow = todosShow.filter(todo => !todo.status)
+    }
+    switch(show) {
+      case 'all':
+        todosShow = [...this.props.todos.todos]
+        break
+      case 'unfinish':
+        todosShow = todosShow.filter(todo => !todo.status)
+        break
+      case 'finish':
+        todosShow = todosShow.filter(todo => todo.status)
+        break
+      default: 
+        todosShow = [...this.props.todos.todos]
+        break
+    }
+
     return (
-      (isLogin) ? <Fragment>
-        <Navbar />
+      <Fragment>
+        <Navbar {...this.props}/>
         <Container>
           <div style={{display: 'block'}}>
-            <button className="btn green" style={{flexWrap: 'wrap'}}>Add Todo</button>
+            <button className="btn green" style={{flexWrap: 'wrap'}} onClick={() => this.setState({openModal: true})}>Add Todo</button>
+            <Modal open={openModal} onClose={() => this.setState({openModal: false})} center> 
+              <AddTodo  closeModal={() => this.setState({openModal: false})}/>
+            </Modal>
           </div>
           <div className="row my-2">
-            <div className="px-2" style={{flex: `0 0 calc(33.333% - 1em)`, borderRight: '1px solid #dee2e6'}}>1</div>        
-            <div className="px-2" style={{flex: '0 0 calc(60.667% - 1em)'}}>
-              <Todos />
+            <div className="px-2" style={{flex: `0 0 calc(25% - 1em)`, borderRight: '1px solid #dee2e6'}}>
+              <Sidebar 
+              all={() => this.setState({show: 'all'})}
+              unfinish={() => this.setState({show: 'unfinish'})}
+              finish={() => this.setState({show: 'finish'})}/>
+            </div>        
+            <div className="px-2" style={{flex: '0 0 calc(70% - 1em)'}}>
+              <Todos todos={todosShow}/>
             </div>
           </div>
         </Container>
-      </Fragment> : <Redirect to="/login"/>
+      </Fragment>
     )
   }
   

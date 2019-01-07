@@ -2,34 +2,18 @@ import React, { Component, Fragment } from 'react'
 import { Redirect, Link } from 'react-router-dom'
 import api from '../../api/api'
 import { connect } from "react-redux";
-
+import login from '../../store/action/login'
 
 const mapStateToProps = (state) => {
   return {
-    isLogin: state.isLogin
+    login: state.login
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    onLoginSuccess: async (token) => {
-      if (token) {
-        const {data: {email}} = await api({
-          method: 'POST',
-          url: '/users',
-          headers: {
-            Auth: token
-          }
-        })
-
-        const action = {
-          type: 'LogInCheck',
-          data: email
-        }
-
-        dispatch(action)
-      }
-      
+    onLoginSuccess:  (token) => {
+      dispatch(login(token))
     }
   }
 }
@@ -56,17 +40,20 @@ class Login extends Component {
       .then(({data}) => {
         // console.log(data)
         localStorage.token = data.token
-        onLoginSuccess(data.token)
-        history.push('/')
+        if (data.token) {
+          onLoginSuccess(data.token)
+          history.push('/')
+        }
       }).catch((err) => {
-        this.setState({errMsg: err.response.data.message})
-        console.log(err.response.data.message)
+        // console.log(err.message)
+        this.setState({errMsg: err.message})
+        console.log(err.message)
       });
   }
 
   render() {
-    const { isLogin } = this.props
     const { email, password, errMsg } = this.state
+    // console.log(this.props)
     const styleLink = {
       marginTop: '2vh',
       float: 'right', 
@@ -81,7 +68,7 @@ class Login extends Component {
         {errMsg}
       </div>
     }
-    return (isLogin) ? <Redirect to="/"/> :
+    return (localStorage.token) ? <Redirect to="/"/> :
     <Fragment>
       <div className="flexbox-container">
         <div className="flexbox-item fixed">

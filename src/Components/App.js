@@ -5,36 +5,16 @@ import Home from './Home'
 import Register from './Register'
 import store from '../store'
 import {Provider} from 'react-redux'
-import api from '../api/api'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { fab } from '@fortawesome/free-brands-svg-icons'
+import { faCheckSquare, faCheck  } from '@fortawesome/free-solid-svg-icons'
 
+library.add(fab, faCheckSquare, faCheck)
 
 class App extends Component {
 
-  
-  async componentDidMount() {
-    console.log('testing did mount')
-    const token = localStorage.token
-    
-    if (token) {
-      const { data } = await api({
-        method: 'POST',
-        url: '/users',
-        headers: {
-          Auth: token
-        }
-      })
-
-      const action = {
-        type: 'LogInCheck',
-        data: data.email
-      }
-      store.dispatch(action)
-      
-    }
-  }
-
   render() {
-    
+    // console.log(store.getState())
     return (
       <Provider store={store}>
         <BrowserRouter>

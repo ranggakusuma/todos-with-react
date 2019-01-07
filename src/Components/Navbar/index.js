@@ -1,34 +1,23 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { connect } from 'react-redux'
 import './style.css'
+// import login 
 
-const mapStateToProps = (state) => {
-  return {
-    isLogin: state.isLogin
-  }
+const logOut = (props) => {
+  // console.log('clicked', props.history)
+  localStorage.clear()
+  props.history.push('/login')
 }
 
-const mapDispatchToProps = (dispatch) => {
-  return {
-    onLogOut: () => {
-      localStorage.clear()
-      const action = {
-        type: 'Logout'
-      }
-      // console.log(dispatch)
-      dispatch(action)
-    }
-  }
-}
 
 const Navbar = (props) =>  {
+
   return (
     <ul>
       <li><Link to="/">Home</Link></li>
-      <li className="right"><div onClick={props.onLogOut} style={{cursor: 'pointer'}}>Logout</div></li>
+      <li className="right"><div onClick={() => logOut(props)} style={({cursor: 'pointer'})}>Logout</div></li>
     </ul>
   )
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Navbar)
+export default Navbar
